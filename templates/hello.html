@@ -1,0 +1,186 @@
+<!-- author ben lawson (balawson@bu.edu) -->
+<!doctype html>
+{% if message %}
+  <h4>{{message}}!</h4>
+{% endif %}
+<title>Photoshare</title>
+{% if name %}
+  <h1>Hello {{ name }}!</h1>
+{% endif %}
+
+{% if message is none %}
+  <p>You should <a href='/login'>login!</a></p>
+{% else %}
+  <p> Go to <a href='/profile'>profile?</a></p>
+{% endif %}
+
+<ul>
+<li><a href='/album'>Create an album</a> </li>
+<li><a href='/upload'>Upload a photo</a> </li>
+<li><a href='/friend'>Make a friend </a> </li>
+<li><a href='/recommendation'>recommendation</a></li>
+<li><a href='/logout'>Logout</a></li>
+<li><a href='/'>Home</a></li>
+</ul>
+
+{% if contributors %}
+  <p> Top 10 contributors on Photoshare: </p>
+    <ol type="1">
+    {% for contributor in contributors %}
+        <li>{{contributor[0]}} ({{contributor[1]}})</li>
+    {% endfor %}
+    </ol>
+{% endif %}
+
+{% if friends %}
+  <p> Here are your friend(s): </p>
+    <ol type="1">
+    {% for friend in friends %}
+        <li>{{friend}} <a href="/deleteFriend/{{friend}}"> delete this friend </a>
+        </li>
+    {% endfor %}
+    </ol>
+{% else %}
+  <p> You don't have any friend yet. Go make a <a href='/friend'> friend </a>? </p>
+{% endif %}
+
+{% if tags %}
+
+  <h3>Most popular tag: <a href='/viewTag/{{mostPopularTag}}'>#{{ mostPopularTag }}</a> </h3>
+
+  <form method="post" action="/searchPhotoByTag">
+    <label for="tag">Search photo by tags: </label>
+    
+    <input type="text" name = "query" />
+    <input type="submit" value="View" />
+  </form> 
+
+  <h2>View All photos on Photoshare by tags: </h2>
+  <form method="post" action="/viewPhotoByTag">
+    <label for="tag">Find photo by tag: </label>
+    <select id="word" name="word"> 
+      {% for tag in tags %}
+        <option value="{{tag[0]}}">
+          {{tag[0]}} <br>
+        </option> 
+      {% endfor %}
+    </select>
+    <input type="submit" value="View" />
+  </form> 
+
+  {% if name %}
+    <h2>Look up All YOUR photos by tags: </h2>
+    <form method="post" action="/viewYourPhotoByTag">
+      <label for="tag">Choose a tag: </label>
+      <select id="word" name="word"> 
+        {% for tag in tags %}
+          <option value="{{tag[0]}}">
+            {{tag[0]}} <br>
+          </option> 
+        {% endfor %}
+      </select>
+      <input type="submit" value="View" />
+    </form> 
+  {% endif %}
+{% else %}
+    No one has made any tags yet. Go to your <a href='/profile'>profile</a> to make a tag on a photo!
+{% endif %}
+
+{% if albums %}
+  <h2>Here are your albums</h2>
+  <ul>
+    {% for album in albums %}
+    <li> 
+      <a href='/viewAlbum/{{album[0]}}'>{{album[1]}}</a>
+             <a href="{{ url_for('deleteAlbum', aid=album[0]) }}"> delete this album </a>
+    </li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
+{% if userphotos %}
+  <h2>Here are your photos</h2>
+    <ul>
+    {% for photo in userphotos %}
+        <li> Caption: {{photo[2]}}<br>
+          in Album: {{photo[3]}} <br>
+        <img src='data:image/jpg;base64, {{ base64.b64encode(photo[0]).decode("ascii") }}' width="500"/> <br>
+        <a href="{{ url_for('deletePhoto', pid=photo[1]) }}"> delete this photo </a>
+
+        <form method="post" action="/tag{{photo[1]}}">
+          <label for="tag">Choose a tag from below to tag this photo: </label>
+          <select id="word" name="word"> 
+            {% for tag in tags %}
+              <option value="{{tag[0]}}">
+                {{tag[0]}} <br>
+              </option> 
+            {% endfor %}
+          </select>
+          <input type="submit" value="Tag!" />
+        </form> 
+
+        <form method="post" action="{{ url_for('newTag', pid=photo[1]) }}">
+
+          <label for="comment">Or type a new word to tag this photo: </label>
+          <input type="text" name="word" />
+
+          <input type="submit" value="Tag!" />
+        </form>
+
+      </li><br>
+    {% endfor %}
+    </ul>
+{% else %}
+<p> You don't have any photos yet. <a href='/upload'> Upload your first photo? </a> </p>
+{% endif %}
+
+{% if allphotos %}
+  <h2>Here are all photo(s) on Photoshare </h2>
+    <ul>
+    {% for photo in allphotos %}
+        <li> user: {{photo[3]}}<br>
+          Caption: {{photo[2]}}<br>
+        <img src='data:image/jpg;base64, {{ base64.b64encode(photo[0]).decode("ascii") }}' width="500"/></li><br>
+
+        <li> 0
+        {% for like in likes %}
+          {% if like[0] == photo[1] %}
+            {{like[1]}}
+          {% endif %}
+        {% endfor %}
+          people liked this pictures. </li> <br>
+
+        <form method="post" action="/like{{photo[4]}} {{photo[1]}}">
+          <input type="submit" value="Like" />
+        </form> 
+        <form method="post" action="/unlike{{photo[4]}} {{photo[1]}}">
+          <input type="submit" value="Unlike" />
+        </form> <br>
+        
+        {% for comment in allcomments %}
+          {% if comment[1] == photo[1] %}
+            <li> {{comment[4]}} on {{comment[3]}}: {{comment[0]}} 
+              {% if name == comment[4] %}
+                <a href="/deleteComment/{{comment[5]}}"> delete this comment </a>
+              {% endif %}
+
+              {% if comment[2] == 1 %}
+                <a href="/deleteComment/{{comment[5]}}"> delete this comment </a>
+              {% endif %}
+              </li>
+          {% endif %}
+        {% endfor %}
+
+        {% if name != photo[3] %}
+          <form method="post" action="{{ url_for('comment', pid=photo[1]) }}">
+
+              <label for="comment">Leave a comment: </label>
+              <input type="text" name="comment" /><br />
+
+            <input type="submit" />
+          </form> <br>
+        {% endif %}
+
+    {% endfor %}
+    </ul>
+{% endif %}

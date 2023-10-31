@@ -1,0 +1,18 @@
+<!doctype html>
+
+<head>
+    <title>Get recommendation!</title>
+</head>
+
+<div class="title">
+    <h1>Get recommendations from Photoshare</h1>
+</div>
+
+
+<ul>
+{% for photo in photos %}
+    <li> user: {{photo[2]}}<br>
+    Caption: {{photo[1]}}<br>
+    <img src='data:image/jpg;base64, {{ base64.b64encode(photo[0]).decode("ascii") }}' width="500"/></li><br>
+{% endfor %}
+</ul>

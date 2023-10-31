@@ -1,0 +1,29 @@
+<!doctype html>
+
+{% if tag %}
+    <head>
+        <title>View By Tag </title>
+    </head>
+
+    {% if uid %}
+        <h1>Here are all YOUR photos by the tag {{ word }} </h1>
+    {% else %}
+        <h1>Here are all photos on Photoshare by the tag {{ word }} </h1>
+    {% endif %}
+
+{% endif %}
+
+{% if albumName %}
+    <head>
+        <title>View By Album </title>
+    </head>
+
+    <h1>Here are all your photos in the album {{ albumName }} </h1>
+
+{% endif %}
+
+{% for photo in photos %}
+<li> user: {{photo[3]}}<br>
+    Caption: {{photo[2]}}<br>
+<img src='data:image/jpg;base64, {{ base64.b64encode(photo[1]).decode("ascii") }}' width="500"/></li><br>
+{% endfor %}
